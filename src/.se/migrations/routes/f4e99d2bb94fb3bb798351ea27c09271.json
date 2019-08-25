@@ -1,0 +1,18 @@
+{
+    "body": "",
+    "component": "@SE/SEPHPBridge/Controller/ACP/Migrations.js",
+    "css": "",
+    "description": "",
+    "guests": true,
+    "hasBody": false,
+    "htmlEditor": null,
+    "id": "SEPHPBridge:acp:migrations",
+    "js": "",
+    "keywords": "",
+    "layout": 0,
+    "params": {},
+    "title": "{{phrase('73a04a22864b7ad0b41a4011659c943f')}}",
+    "url": "/acp/sephp/migrations",
+    "userGroups": [],
+    "version": "1.0.6"
+}

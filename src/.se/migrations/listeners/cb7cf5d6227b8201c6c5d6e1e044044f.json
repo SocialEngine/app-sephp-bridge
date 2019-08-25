@@ -1,0 +1,7 @@
+{
+    "code": "const app = require('app');\n\nmodule.exports = async function (event) {\n    event.config.sephp = {\n        url: await app.data.get('sephp:url')\n    }\n};\n",
+    "events": [
+        "ApiSiteBuild.js.config"
+    ],
+    "version": "1.0.6"
+}

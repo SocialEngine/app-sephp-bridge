@@ -1,0 +1,7 @@
+{
+    "code": "const app = require('app');\n\nmodule.exports = async function (event) {\n    let legacyUser = await app.data.get(\n        'sephp:migration:users:data:' + event.user.id\n    );\n    if (legacyUser) {\n        legacyUser = JSON.parse(legacyUser);\n    }\n    const response = await app.module.request('POST', '/bridge/api/login', {\n        user_id: legacyUser.user_id,\n        password: event.password\n    });\n    if (response.isValidPassword !== undefined && response.isValidPassword) {\n        await app.api.users.updateInternal(event.user.id, {\n            password: app.utility.hash.make(event.password)\n        });\n        event.pass = true;\n    }\n};\n",
+    "events": [
+        "ApiAuth.create.passwordFailed"
+    ],
+    "version": "1.0.6"
+}

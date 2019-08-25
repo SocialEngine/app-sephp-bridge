@@ -1,0 +1,18 @@
+{
+    "body": "",
+    "component": "@SE/SEPHPBridge/Controller/ACP/Connect.js",
+    "css": "",
+    "description": "",
+    "guests": true,
+    "hasBody": false,
+    "htmlEditor": null,
+    "id": "SEPHPBridge:acp:connect",
+    "js": "",
+    "keywords": "",
+    "layout": 0,
+    "params": {},
+    "title": "{{phrase('d33892cd2f730661abe0502913a0f683')}}",
+    "url": "/acp/sephp/connect",
+    "userGroups": [],
+    "version": "1.0.6"
+}

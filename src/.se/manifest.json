@@ -1,0 +1,23 @@
+{
+    "author": "",
+    "componentReplacements": {},
+    "css": "",
+    "dependencies": {},
+    "description": "",
+    "guid": "b365c544-f167-4ad8-b22d-4c0070e13505",
+    "hidden": false,
+    "id": "@SE/SEPHPBridge",
+    "installUpgradeRules": {},
+    "license": "",
+    "main": "Bootstrap.js",
+    "mainAcp": "ACPBootstrap.js",
+    "moduleCode": "const app = require('app');\n\nmodule.exports = {\n    request: async function (method, endpoint, query = {}) {\n        const url = await app.data.get('sephp:url');\n        const token = await app.data.get('sephp:token');\n        let search = '';\n        let iteration = 0;\n        let props = {};\n        for (const key of Object.keys(query)) {\n            iteration++;\n            if (iteration !== 1) {\n                search += '&';\n            }\n            search += key + '=' + encodeURIComponent(query[key]);\n        }\n        if (search && method === 'GET') {\n            endpoint = endpoint + '?' + search;\n        }\n        if (method !== 'GET') {\n            props.body = JSON.stringify(query);\n        }\n        const request = await app.fetch(url + endpoint, {\n            method: method,\n            ...props,\n            headers: {\n                'SE-Unite-Token': token,\n                'Content-Type': 'application/json'\n            }\n        });\n        return request.json();\n    },\n\n    async getUrl () {\n        return app.data.get('sephp:url');\n    },\n\n    async getUser (id) {\n        let legacyUser = await app.data.get(\n            'sephp:migration:users:data:' + id\n        );\n        if (legacyUser) {\n            legacyUser = JSON.parse(legacyUser);\n        }\n        return legacyUser;\n    },\n\n    async updateUser (id, data) {\n        let current = await this.getUser(id);\n        if (!current) {\n            current = {};\n        }\n        await app.data.set(\n            'sephp:migration:users:data:' + id\n            , JSON.stringify({\n                ...current,\n                ...data\n            }));\n\n        return this.getUser(id);\n    }\n};\n",
+    "price": "0",
+    "priceRecurring": "0",
+    "repository": "",
+    "storeCertified": "1",
+    "storeStatus": "active",
+    "title": "SEPHPBridge",
+    "type": "app",
+    "version": "1.0.0"
+}
