@@ -9,6 +9,9 @@ import Icon from '@SE/Core/Icon';
 import Loader from '@SE/Core/Loader';
 import Progress from '@SE/Core/Progress';
 import Badge from '@SE/Core/Badge';
+import Alert from '@SE/Core/Alert';
+
+const phpUrl = app.config('sephp').url;
 
 export default class SEPHPBridgeControllerACPMigrations extends React.Component {
     static propTypes = {};
@@ -30,6 +33,9 @@ export default class SEPHPBridgeControllerACPMigrations extends React.Component 
     }
 
     componentDidMount () {
+        if (!phpUrl) {
+            return null;
+        }
         app.api('/@SE/SEPHPBridge/migrations')
             .filter()
             .then(response => {
@@ -173,6 +179,13 @@ export default class SEPHPBridgeControllerACPMigrations extends React.Component 
     }
 
     render () {
+        if (!phpUrl) {
+            return (
+                <Alert>
+                    Log into your SEPHP Admin Panel and first create a bridge to Unite.
+                </Alert>
+            );
+        }
         return (
             <AdminController
                 title="SEPHP Migrations"
