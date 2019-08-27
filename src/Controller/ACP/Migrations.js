@@ -12,6 +12,7 @@ import Badge from '@SE/Core/Badge';
 import Alert from '@SE/Core/Alert';
 import {render, Modal} from '@SE/Core/Modal';
 import {Form, Number, Submit} from '@SE/Core/Form';
+import {getProduct} from '@SE/Core/Base/Site';
 
 const phpUrl = app.config('sephp').url;
 
@@ -193,11 +194,20 @@ export default class SEPHPBridgeControllerACPMigrations extends React.Component 
         if (this.hasDependency(record)) {
             return (
                 <div className="text-muted small">
-                    Requires import of {record.dependency.map(name => (
-                        <span key={name} className="badge badge-secondary text-uppercase mr-1">
-                            {name}
+                    Requires import of {record.dependency.map(name => {
+                        const item = this.state.records.find(r => r.id === name);
+                        if (item.completed) {
+                            return null;
+                        }
+                        return (
+                            <span key={name} className={app.withClass(
+                                'badge text-uppercase mr-1',
+                                item.completed ? 'badge-success' : 'badge-secondary'
+                            )}>
+                            {item.name}
                         </span>
-                ))}
+                        );
+                    })}
                 </div>
             );
         }
@@ -223,6 +233,12 @@ export default class SEPHPBridgeControllerACPMigrations extends React.Component 
     }
 
     renderRecord (record) {
+        if (record.requires !== undefined) {
+            const find = record.requires.find(f => !getProduct(f));
+            if (find) {
+                return null;
+            }
+        }
         return (
             <div className="list-group-item" key={record.id}>
                 {this.renderProgress(record)}
