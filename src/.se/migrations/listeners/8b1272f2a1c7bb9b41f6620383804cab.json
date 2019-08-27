@@ -1,0 +1,7 @@
+{
+    "code": "const app = require('app');\n\nmodule.exports = async function (event) {\n    let body = event.payload.body;\n    body = body.replace(/<br\\/>/g, '');\n    body = body.replace(/<br>/g, '');\n    body = body.replace(/<br \\/>/g, '');\n    body = body.replace(/&lt;/g, '<');\n    body = body.replace(/&gt;/g, '>');\n    body = body.replace(/&amp;nbsp;/g, ' ');\n    body = body.replace(/&quot;/g, '\"');\n    body = body.replace(/&#x2F;/g, '/')\n    event.payload.body = body;\n};\n",
+    "events": [
+        "UtilityContent.parse"
+    ],
+    "version": "1.0.6"
+}

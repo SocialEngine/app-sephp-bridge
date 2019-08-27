@@ -10,6 +10,8 @@ import Loader from '@SE/Core/Loader';
 import Progress from '@SE/Core/Progress';
 import Badge from '@SE/Core/Badge';
 import Alert from '@SE/Core/Alert';
+import {render, Modal} from '@SE/Core/Modal';
+import {Form, Number, Submit} from '@SE/Core/Form';
 
 const phpUrl = app.config('sephp').url;
 
@@ -75,31 +77,62 @@ export default class SEPHPBridgeControllerACPMigrations extends React.Component 
         }));
     }
 
-    handleMigration (type) {
-        return () => {
-            this.setState({
-                hasStarted: this.state.hasStarted.concat(type)
-            }, () => {
-                app.api('/@SE/SEPHPBridge/migrations/' + type)
-                    .create({
-                        limit: this.state.limit
-                    })
-                    .then(response => {
-                        this.subscribeToSocket(response);
+    startMigration (type, limit, cb) {
+        this.setState({
+            hasStarted: this.state.hasStarted.concat(type),
+            limit: limit
+        }, () => {
+            app.api('/@SE/SEPHPBridge/migrations/' + type)
+                .create({
+                    limit: this.state.limit
+                })
+                .then(response => {
+                    this.subscribeToSocket(response);
+                    this.setState({
+                        records: this.state.records.map(record => {
+                            if (record.id === response.id) {
+                                return response;
+                            }
+                            return record;
+                        })
+                    }, () => {
                         this.setState({
-                            records: this.state.records.map(record => {
-                                if (record.id === response.id) {
-                                    return response;
-                                }
-                                return record;
-                            })
-                        }, () => {
-                            this.setState({
-                                hasStarted: this.state.hasStarted.filter(g => g !== response.id)
-                            });
-                        });
+                            hasStarted: this.state.hasStarted.filter(g => g !== response.id)
+                        }, cb);
                     });
-            });
+                });
+        });
+    }
+
+    handleMigration (record) {
+        return () => {
+            render(
+                <Modal
+                    title={'Migrate: ' + record.name}
+                    whenReady={modal => (
+                        <Form
+                            coverOnSubmit={true}
+                            onSubmit={({values}) => {
+                                this.startMigration(record.id, values.total || 1000, () => {
+                                    modal.close();
+                                });
+                            }}
+                            values={{
+                                total: 1000
+                            }}
+                            render={({as}) => (
+                                <React.Fragment>
+                                    <Number
+                                        {...as('total')}
+                                        label="How many records per request should we import?"
+                                        value={1000}
+                                    />
+                                    <Submit value="Start" />
+                                </React.Fragment>
+                            )} />
+                    )}
+                />
+            );
         };
     }
 
@@ -185,7 +218,7 @@ export default class SEPHPBridgeControllerACPMigrations extends React.Component 
             );
         }
         return (
-            <Button onClick={this.handleMigration(record.id)}>Start</Button>
+            <Button onClick={this.handleMigration(record)}>Start</Button>
         );
     }
 
@@ -194,7 +227,7 @@ export default class SEPHPBridgeControllerACPMigrations extends React.Component 
             <div className="list-group-item" key={record.id}>
                 {this.renderProgress(record)}
                 <div className="d-flex align-items-center">
-                    <div className="text-uppercase">
+                    <div>
                         {record.name}
                     </div>
                     <div className="ml-auto">

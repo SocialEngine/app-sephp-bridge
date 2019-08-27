@@ -34,6 +34,13 @@ export default class ItemPost extends React.Component {
     }
 
     render () {
+        if (this[this.state.method] === undefined) {
+            return (
+                <div className="alert alert-danger">
+                    {this.state.method} is not a valid Post item.
+                </div>
+            );
+        }
         return this[this.state.method]();
     }
 }
