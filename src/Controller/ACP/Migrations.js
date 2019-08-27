@@ -57,7 +57,6 @@ export default class SEPHPBridgeControllerACPMigrations extends React.Component 
             return null;
         }
         this.listeners.push(app.subscribe('ws:' + response.socketId, (data) => {
-            console.log(data.migration);
             this.setState({
                 records: this.state.records.map(record => {
                     if (record.id === data.migration.id) {
@@ -113,6 +112,21 @@ export default class SEPHPBridgeControllerACPMigrations extends React.Component 
         return (meta.page >= pages);
     }
 
+    hasDependency (record) {
+        let hasDependency = false;
+        if (record.dependency !== undefined && Array.isArray(record.dependency)) {
+            for (const check of record.dependency) {
+                const find = this.state.records.find(r => r.id === check);
+                if (find && !find.completed) {
+                    hasDependency = true;
+                    break;
+                }
+            }
+        }
+
+        return hasDependency;
+    }
+
     renderProgress (record) {
         const meta = this.state.meta[record.id] || null;
         if (!meta) {
@@ -124,11 +138,11 @@ export default class SEPHPBridgeControllerACPMigrations extends React.Component 
         }
         const progress = Math.floor((meta.page / meta.total) * 100);
         return (
-            <div className="d-flex">
-                <div>
+            <div className="row align-items-center mb-2">
+                <div className="col">
                     <Progress progress={progress} />
                 </div>
-                <div className="ml-auto">
+                <div className="col-auto">
                     <Badge className="badge-secondary">
                         {meta.page}/{pages}
                     </Badge>
@@ -143,7 +157,20 @@ export default class SEPHPBridgeControllerACPMigrations extends React.Component 
         if (meta) {
             isCompleted = this.isCompleted(meta);
         }
-        if ((!record.completed && record.started) || (this.state.hasStarted.includes(record.id) && !isCompleted)) {
+        if (this.hasDependency(record)) {
+            return (
+                <div className="text-muted small">
+                    Requires import of {record.dependency.map(name => (
+                        <span key={name} className="badge badge-secondary text-uppercase mr-1">
+                            {name}
+                        </span>
+                ))}
+                </div>
+            );
+        }
+        if (((!record.completed && !isCompleted && record.started) || this.state.hasStarted.includes(record.id)) &&
+            (!app.get('force'))
+        ) {
             return (
                 <div><Loader /></div>
             );

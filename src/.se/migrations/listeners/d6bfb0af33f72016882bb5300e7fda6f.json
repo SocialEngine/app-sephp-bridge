@@ -1,0 +1,7 @@
+{
+    "code": "const app = require('app');\n\nmodule.exports = async function ({payload}) {\n    if (payload.allowed !== undefined) {\n        payload.allowed.push({\n            key: 'legacy'\n        });\n    }\n};",
+    "events": [
+        "PostTypesEntity.verifyObjectKeys"
+    ],
+    "version": "1.0.6"
+}

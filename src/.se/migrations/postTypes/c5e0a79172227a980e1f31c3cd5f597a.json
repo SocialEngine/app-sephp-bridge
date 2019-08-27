@@ -1,0 +1,10 @@
+{
+    "addToFeed": true,
+    "component": "@SE/SEPHPBridge/Item/Post.js",
+    "id": "@SE/SEPHPBridge:post",
+    "params": {},
+    "permalink": "/post/:id/:subject",
+    "title": "General SEPHP Post",
+    "typeId": "post",
+    "version": "1.0.6"
+}
