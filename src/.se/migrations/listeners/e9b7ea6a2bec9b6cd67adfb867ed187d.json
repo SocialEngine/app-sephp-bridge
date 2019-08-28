@@ -1,5 +1,5 @@
 {
-    "code": "const app = require('app');\n\nmodule.exports = async function (event) {\n    if (event.user.type) {\n        console.log('Not a normal user to update.');\n        return null;\n    }\n    const user = await app.module.getUser(event.user.id);\n    if (!user) {\n        console.log('User not created yet...');\n        return null;\n    }\n    app.module.request('PUT', '/bridge/api/users/' + user.user_id, {\n        ...event.user.asJSON(),\n        email: event.user.getEmail()\n    })\n        .then(() => true)\n        .catch(() => false);\n};\n",
+    "code": "const app = require('app');\n\nmodule.exports = async function (event) {\n    if (event.user.type) {\n        console.log('Not a normal user to update.');\n        console.log('type:' + event.user.type, event.user.name);\n        return null;\n    }\n    const user = await app.module.getUser(event.user.id);\n    if (!user) {\n        console.log('User not created yet...');\n        return null;\n    }\n    app.module.request('PUT', '/bridge/api/users/' + user.user_id, {\n        ...event.user.asJSON(),\n        email: event.user.getEmail()\n    })\n        .then(() => true)\n        .catch(() => false);\n};\n",
     "events": [
         "User.update"
     ],

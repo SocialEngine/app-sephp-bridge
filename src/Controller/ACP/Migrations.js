@@ -196,6 +196,9 @@ export default class SEPHPBridgeControllerACPMigrations extends React.Component 
                 <div className="text-muted small">
                     Requires import of {record.dependency.map(name => {
                         const item = this.state.records.find(r => r.id === name);
+                        if (!item) {
+                            return null;
+                        }
                         if (item.completed) {
                             return null;
                         }
