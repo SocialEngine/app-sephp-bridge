@@ -1,0 +1,7 @@
+{
+    "code": "const app = require('app');\n\nmodule.exports = async function (user) {\n    const params = {\n        ...user.asJSON(),\n        email: user.getEmail()\n    };\n    const legacyId = await app.module.request('POST', '/bridge/api/users', params).catch(() => false);\n    await app.module.migration.set('users', 'reverse:' + legacyId, user.id);\n    await app.module.migration.set('users', 'data:' + user.id, JSON.stringify({\n        user_id: legacyId\n    }));\n    console.log('params', params);\n    console.log('legacyId', legacyId);\n};\n",
+    "events": [
+        "APIUser:create"
+    ],
+    "version": "1.0.6"
+}
