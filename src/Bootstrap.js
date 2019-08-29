@@ -13,7 +13,7 @@ app.subscribe('ComponentsUserServiceAuth.login', function (event) {
 
 app.subscribe('AccountControllerLogout.done', function (event) {
     event.payload.bypass = true;
-    window.location.href = app.config('sephp').url + '/bridge/sso?logout=true';
+    window.location.href = app.config('sephp').url + '/bridge/connect/sso?logout=true';
 });
 
 app.subscribe('UserImage.buildImage.picture', function (event) {
