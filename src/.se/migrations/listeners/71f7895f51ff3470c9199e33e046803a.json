@@ -1,5 +1,5 @@
 {
-    "code": "const app = require('app');\n\nmodule.exports = async function (user) {\n    const params = {\n        ...user.asJSON(),\n        email: user.getEmail()\n    };\n    const legacyId = await app.module.request('POST', '/bridge/api/users', params).catch(() => false);\n    await app.module.migration.set('users', 'reverse:' + legacyId, user.id);\n    await app.module.migration.set('users', 'data:' + user.id, JSON.stringify({\n        user_id: legacyId\n    }));\n    console.log('params', params);\n    console.log('legacyId', legacyId);\n};\n",
+    "code": "const app = require('app');\n\nmodule.exports = async function (user) {\n    if (app.isCli()) {\n        console.log('IS CLI, SKIP');\n        return;\n    }\n    const params = {\n        ...user.asJSON(),\n        email: user.getEmail()\n    };\n    const legacyId = await app.module.request('POST', '/bridge/api/users', params).catch(() => false);\n    await app.module.migration.set('users', 'reverse:' + legacyId, user.id);\n    await app.module.migration.set('users', 'data:' + user.id, JSON.stringify({\n        user_id: legacyId\n    }));\n};\n",
     "events": [
         "APIUser:create"
     ],
