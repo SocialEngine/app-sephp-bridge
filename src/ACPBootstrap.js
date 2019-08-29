@@ -3,6 +3,12 @@
  */
 import app from '@SE/Core/App';
 
+app.subscribe('Nav.renderItem', function ({menu}) {
+    if (menu.name === 'sephpBridgeSettings') {
+        menu.hide = true;
+    }
+});
+
 app.subscribe('AdminNav:nav', function (main) {
     const before = {};
     const after = {};
@@ -24,6 +30,11 @@ app.subscribe('AdminNav:nav', function (main) {
             title: 'SEPHP Bridge',
             icon: 'fas fa-link',
             children: [
+                {
+                    title: 'Settings',
+                    href: '/acp/settings/sephp',
+                    icon: 'fas fa-cog'
+                },
                 {
                     title: 'Migrations',
                     href: '/acp/sephp/migrations',

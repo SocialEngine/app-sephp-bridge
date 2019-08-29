@@ -1,0 +1,12 @@
+{
+    "children": [],
+    "hidden": false,
+    "href": "/acp/settings/sephp",
+    "icon": "fas fa-cog",
+    "location": "admin:settings",
+    "name": "sephpBridgeSettings",
+    "order": 1,
+    "title": "{{phrase('aa0fecea04e4b28e7911e20ac52e8094')}}",
+    "userGroups": [],
+    "version": "1.0.6"
+}

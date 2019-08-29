@@ -1,0 +1,13 @@
+{
+    "formOptions": {},
+    "group": "sephp",
+    "info": "{{phrase('bf42c05f6e54c7cafbdf2b4a7816f72b')}}",
+    "isPublic": true,
+    "key": "sephp:cdnUrl",
+    "label": "{{phrase('3393a1f38669e4fd9716ba5fd7f31639')}}",
+    "options": {},
+    "order": "1",
+    "productId": "@SE/SEPHPBridge",
+    "type": "text",
+    "version": "1.0.6"
+}
