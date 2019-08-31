@@ -24,7 +24,7 @@ export default class SEPHPBridgeControllerACPMigrations extends React.Component 
 
         this.listeners = [];
         this.state = {
-            limit: 2,
+            limit: 500,
             records: [],
             meta: {},
             hasStarted: []
@@ -138,6 +138,9 @@ export default class SEPHPBridgeControllerACPMigrations extends React.Component 
     }
 
     getTotalPages (meta) {
+        console.log('getTotalPages');
+        console.log('meta.total:', meta.total);
+        console.log('this.state.limit', this.state.limit);
         return Math.ceil(meta.total / this.state.limit);
     }
 
@@ -171,6 +174,7 @@ export default class SEPHPBridgeControllerACPMigrations extends React.Component 
             return null;
         }
         const progress = Math.floor((meta.page / meta.total) * 100);
+        console.log('progress', progress);
         return (
             <div className="row align-items-center mb-2">
                 <div className="col">
