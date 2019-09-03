@@ -23,7 +23,11 @@ app.subscribe('UserImage.buildImage.picture', function (event) {
             const photo = JSON.parse(picture);
             const find = photo.find(p => p.type === 'default');
             if (find) {
-                event.payload.picture = app.config('sephp').url + '/' + find.path;
+                let url = app.config('sephp').url;
+                if (app.setting('sephp:cdnUrl')) {
+                    url = app.setting('sephp:cdnUrl');
+                }
+                event.payload.picture = url + '/' + find.path;
             }
         } catch (e) {}
     }
