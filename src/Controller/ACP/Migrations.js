@@ -173,7 +173,7 @@ export default class SEPHPBridgeControllerACPMigrations extends React.Component 
         if (this.isCompleted(meta)) {
             return null;
         }
-        const progress = Math.floor((meta.page / meta.total) * 100);
+        const progress = Math.floor((meta.page / pages) * 100);
         console.log('progress', progress);
         return (
             <div className="row align-items-center mb-2">
