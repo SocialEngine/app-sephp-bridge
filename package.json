@@ -1,0 +1,26 @@
+{
+  "name": "@socialengine/app-sephp-bridge",
+  "private": true,
+  "version": "1.0.4",
+  "description": "",
+  "main": "socialengine",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SocialEngine/app-sephp-bridge.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SocialEngine/sdk/issues"
+  },
+  "homepage": "https://github.com/SocialEngine/sdk#readme",
+  "dependencies": {
+    "@socialengine/command": "git://github.com/SocialEngine/command.git",
+    "@socialengine/unite-ide-helper": "git://github.com/SocialEngine/unite-ide-helper.git",
+    "prop-types": "^15.6.1",
+    "react": "^16.7.0"
+  }
+}

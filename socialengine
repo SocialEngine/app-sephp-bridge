@@ -1,0 +1,14 @@
+#!/usr/bin/env node
+const path = require('path');
+
+const files = [
+    '../command/src/console',
+    '@socialengine/command'
+];
+
+for (const file of files) {
+    try {
+        require(path.join(file));
+        break;
+    } catch (e) {}
+}
