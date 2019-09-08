@@ -1,6 +1,7 @@
 import app from '@SE/Core/App';
-
 import '@SE/SEPHPBridge/Style/Common';
+
+console.log('Bridge Bootstrap [1]');
 
 app.subscribe('ComponentsUserServiceAuth.login', function (event) {
     event.payload.bypass = true;

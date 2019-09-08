@@ -2,6 +2,8 @@
  * @breeze-acp
  */
 import app from '@SE/Core/App';
+import React from 'react';
+import AdminControllerUsersEdit from '@SE/SEPHPBridge/Plugin/ACP/AdminControllerUsersEdit';
 
 app.subscribe('Nav.renderItem', function ({menu}) {
     if (menu.name === 'sephpBridgeSettings') {
@@ -44,4 +46,10 @@ app.subscribe('AdminNav:nav', function (main) {
         },
         ...after
     };
+});
+
+app.hook('AdminControllerUsersEdit.render.details', function (hook) {
+    return (
+        <AdminControllerUsersEdit {...hook} />
+    );
 });

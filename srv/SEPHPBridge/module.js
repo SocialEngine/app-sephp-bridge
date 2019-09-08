@@ -1,7 +1,7 @@
 const app = require('app');
 
 /*
- * EDIT[1]
+ * EDIT[12]
  */
 
 const validMigrations = {

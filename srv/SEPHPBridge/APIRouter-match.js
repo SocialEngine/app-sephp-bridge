@@ -1,6 +1,13 @@
 const app = require('app');
 
 module.exports = async function ({router}) {
+    router.get('/users/:id', async function (req, res) {
+        await app.api.adminsOnly();
+        res(await app.module.getUser(req.get(':id'), {
+            user_id: req.get('se_user_id')
+        }));
+    });
+
     router.put('/users/:id', async function (req, res) {
         await app.api.adminsOnly();
         res({
