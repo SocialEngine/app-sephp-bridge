@@ -15,7 +15,7 @@ module.exports = async function (event) {
                 }
             }
             let image = '';
-            let fetchImage = null;
+            let fetchImage = 'https://upload.wikimedia.org/wikipedia/commons/c/ca/1x1.png';
             if (user.images.small !== undefined && user.images.small) {
                 let size = 'small';
                 if (type === 'thumb.profile') {
@@ -23,7 +23,7 @@ module.exports = async function (event) {
                 }
                 fetchImage = user.images[size];
             } else {
-                if (user.picture.substr(0, 1) === '[') {
+                if (user.picture && user.picture.substr(0, 1) === '[') {
                     try {
                         const photo = JSON.parse(user.picture);
                         const find = photo.find(p => p.type === type);
