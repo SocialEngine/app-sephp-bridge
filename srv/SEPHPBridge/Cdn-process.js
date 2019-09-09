@@ -8,12 +8,15 @@ module.exports = async function (event) {
             const user = await app.module.getUserFromLegacyId(check[2]);
             let url = await app.data.get('sephp:url');
             let cdnUrl = await app.setting('sephp:cdnUrl');
-            if (cdnUrl && cdnUrl.slice(-1) === '/') {
-                url = cdnUrl.substr(0, cdnUrl.length -1);
+            if (cdnUrl) {
+                url = cdnUrl;
+                if (url.slice(-1) === '/') {
+                    url = url.substr(0, url.length -1);
+                }
             }
             let image = '';
             let fetchImage = null;
-            if (user.images.small !== undefined) {
+            if (user.images.small !== undefined && user.images.small) {
                 let size = 'small';
                 if (type === 'thumb.profile') {
                     size = 'large';
