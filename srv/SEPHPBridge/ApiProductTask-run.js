@@ -1,6 +1,6 @@
 const app = require('app');
 
-// EDIT[12]
+// EDIT[123]
 
 async function apiRequest (endpoint, query = {}) {
     const url = await app.data.get('sephp:url');
@@ -45,14 +45,31 @@ async function handleItem (record) {
 
     let productId = '@SE/User';
     let typeId = 'status';
+    const legacyProps = {};
+    const props = {};
     switch (record.type) {
         case 'blog_new':
             productId = '@SE/Topic';
             typeId = 'topic';
             break;
+        case 'album_photo_new':
+            productId = '@SE/Media';
+            typeId = 'image';
+            const storageIds = [];
+            for (const photoUrl of record.photos) {
+                const storage = await app.api.storage.create({
+                    productId: '@SE/Media',
+                    typeId: 'image',
+                    externalFile: photoUrl
+                });
+                if (storage) {
+                    storageIds.push(storage.id);
+                }
+            }
+            props.storageId = storageIds;
+            break;
     }
 
-    const props = {};
     if (record.category_id !== undefined && record.category_id) {
         const channel = await app.module.migration.getKey('categories', 'reverse:' + record.category_id);
         if (channel) {
@@ -60,7 +77,7 @@ async function handleItem (record) {
         }
     }
 
-    const post = await app.api.posts.create({
+    const createProps = {
         productId: productId,
         typeId: typeId,
         body: record.body,
@@ -69,11 +86,13 @@ async function handleItem (record) {
             legacy: {
                 id: record.id,
                 type: record.type,
-                params: record.params
+                params: record.params,
+                ...legacyProps
             }
         },
         ...props
-    }).catch(e => {
+    };
+    const post = await app.api.posts.create(createProps).catch(e => {
         console.error(e);
         return false;
     });
@@ -113,8 +132,10 @@ const handleMigration = {
     },
 
     'blogs-categories': handleCategory('blogs'),
+    'albums-categories': handleCategory('photos'),
 
     blogs: handleItem,
+    albums: handleItem,
     status: handleItem,
 
     users: async function (record) {

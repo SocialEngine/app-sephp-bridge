@@ -29,6 +29,17 @@ const validMigrations = {
         name: 'Blogs',
         dependency: ['users', 'connections', 'blogCategories'],
         requires: ['@SE/Topic']
+    },
+    'albums-categories': {
+        id: 'albums-categories',
+        name: 'Album Categories',
+        requires: ['@SE/Media']
+    },
+    albums: {
+        id: 'albums',
+        name: 'Albums',
+        dependency: ['users', 'connections', 'albumCategories'],
+        requires: ['@SE/Topic']
     }
 };
 
