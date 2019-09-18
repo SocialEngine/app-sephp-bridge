@@ -68,6 +68,14 @@ async function handleItem (record) {
             }
             props.storageId = storageIds;
             break;
+        case 'video_new':
+            productId = '@SE/Video';
+            typeId = 'video';
+            legacyProps.video = {
+                code: record.code,
+                photo: record.photo
+            };
+            break;
     }
 
     if (record.category_id !== undefined && record.category_id) {
@@ -133,10 +141,12 @@ const handleMigration = {
 
     'blogs-categories': handleCategory('blogs'),
     'albums-categories': handleCategory('photos'),
+    'videos-categories': handleCategory('videos'),
 
     blogs: handleItem,
     albums: handleItem,
     status: handleItem,
+    videos: handleItem,
 
     users: async function (record) {
         let user = await app.api.users.findByEmail(record.email);

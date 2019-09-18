@@ -27,7 +27,7 @@ const validMigrations = {
     blogs: {
         id: 'blogs',
         name: 'Blogs',
-        dependency: ['users', 'connections', 'blogCategories'],
+        dependency: ['users', 'connections', 'blog-categories'],
         requires: ['@SE/Topic']
     },
     'albums-categories': {
@@ -38,8 +38,19 @@ const validMigrations = {
     albums: {
         id: 'albums',
         name: 'Albums',
-        dependency: ['users', 'connections', 'albumCategories'],
+        dependency: ['users', 'connections', 'albums-categories'],
         requires: ['@SE/Topic']
+    },
+    'videos-categories': {
+        id: 'videos-categories',
+        name: 'Video Categories',
+        requires: ['@SE/Video']
+    },
+    videos: {
+        id: 'videos',
+        name: 'Videos',
+        dependency: ['users', 'connections', 'videos-categories'],
+        requires: ['@SE/Video']
     }
 };
 
