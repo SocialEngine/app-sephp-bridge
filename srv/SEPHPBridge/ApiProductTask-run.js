@@ -95,6 +95,19 @@ async function handleItem (record) {
             productId = '@SE/Discussion';
             typeId = 'discussion';
             break;
+        case 'polls':
+            productId = '@SE/User';
+            typeId = 'status';
+            props.pollQuestion = record.subject;
+            props.pollAnswer = [];
+            record.subject = '';
+            let answerIteration = 0;
+            for (const answer of record.answers) {
+                answerIteration++;
+                await app.module.migration.set('pollAnswer', answer['poll_option_id'], answerIteration);
+                props.pollAnswer.push(answer['poll_option']);
+            }
+            break;
     }
 
     if (record.category_id !== undefined && record.category_id) {
@@ -134,6 +147,18 @@ async function handleItem (record) {
     await app.module.migration.set('posts', record.type + ':' + record.id, post.id);
 
     console.log('Post:', post.id);
+
+    if (record.type === 'polls') {
+        for (const vote of record.votes) {
+            user = await app.module.getUserFromLegacyId(vote.user_id);
+            const answerId = await app.module.migration.getKey('pollAnswer', vote['poll_option_id']);
+            await app.setViewer(user.id);
+            await app.api.posts.update(post.id, {
+                pollVote: answerId
+            });
+            console.log('Poll Vote:', vote.user_id, vote['poll_option_id'], answerId);
+        }
+    }
 
     for (const comment of record.comments) {
         user = await app.module.getUserFromLegacyId(comment.poster_id);
@@ -177,6 +202,7 @@ const handleMigration = {
     status: handleItem,
     videos: handleItem,
     forums: handleItem,
+    polls: handleItem,
 
     users: async function (record) {
         let user = await app.api.users.findByEmail(record.email);

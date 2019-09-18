@@ -62,6 +62,12 @@ const validMigrations = {
         name: 'Forum Topics/Posts',
         dependency: ['users', 'connections', 'forums-categories'],
         requires: ['@SE/Discussion']
+    },
+    polls: {
+        id: 'polls',
+        name: 'Polls',
+        dependency: ['users', 'connections'],
+        requires: ['@SE/Poll']
     }
 };
 
