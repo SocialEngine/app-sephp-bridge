@@ -1,6 +1,77 @@
 const app = require('app');
 
 module.exports = async function ({router}) {
+    router.get('/redirect', async function (req, res) {
+        const uri = req.get('uri');
+        const handleRedirection = (type) => {
+            return async (segmentKeys) => {
+                const postId = await app.module.migration.getKey('posts', type + ':' + segmentKeys[':id']);
+                console.log('segmentKeys', type + ':' + segmentKeys[':id'], postId);
+                const post = await app.api.posts.read(postId).catch(() => false);
+                if (!post) {
+                    return false;
+                }
+                return post.permalink;
+            }
+        };
+        const map = [
+            {
+                match: [
+                    '/forums/topic/:id/:title/view/post_id/:post',
+                    '/forums/topic/:id/:title'
+                ],
+                action: handleRedirection('forum_topic')
+            },
+            {
+                match: [
+                    '/polls/view/:id/:title'
+                ],
+                action: handleRedirection('polls')
+            },
+            {
+                match: [
+                    '/videos/:section/:id/:title'
+                ],
+                action: handleRedirection('video_new')
+            }
+        ];
+        let callMatch = null;
+        const segmentKeys = [];
+        const segments = {};
+        for (const item of map) {
+            for (const match of item.match) {
+                if (app.pathToRegex(match, segmentKeys).exec(uri)) {
+                    callMatch = item.action;
+                    let matchParts = match.split('/');
+                    let uriParts = uri.split('/');
+                    for (const segment of segmentKeys) {
+                        let iteration = 0;
+                        for (const matchPart of matchParts) {
+                            if (matchPart === ':' + segment.name) {
+                                break;
+                            }
+                            iteration++;
+                        }
+                        segments[':' + segment.name] = uriParts[iteration] || null;
+                    }
+                    break;
+                }
+            }
+            if (callMatch) {
+                break;
+            }
+        }
+        if (callMatch) {
+            const r = await callMatch(segments);
+            return res({
+                to: r
+            });
+        }
+        res({
+            error: 'No redirect found.'
+        });
+    });
+
     router.get('/users/:id', async function (req, res) {
         await app.api.adminsOnly();
         res(await app.module.getUser(req.get(':id'), {

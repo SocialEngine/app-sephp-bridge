@@ -55,7 +55,7 @@ function handleCategory (type) {
 }
 
 async function handleItem (record) {
-    let user = await app.module.getUserFromLegacyId(record.subject_id);
+    let user = await app.module.getUserFromLegacyId(record.user_id);
     await app.setViewer(user.id);
 
     let productId = '@SE/User';
@@ -160,26 +160,28 @@ async function handleItem (record) {
         }
     }
 
-    for (const comment of record.comments) {
-        user = await app.module.getUserFromLegacyId(comment.poster_id);
-        await app.setViewer(user.id);
-        const commentProps = {};
-        if (comment['creation_date'] !== undefined) {
-            commentProps.created = app.moment(comment['creation_date']).unix();
+    if (record.comments !== undefined) {
+        for (const comment of record.comments) {
+            user = await app.module.getUserFromLegacyId(comment.poster_id);
+            await app.setViewer(user.id);
+            const commentProps = {};
+            if (comment['creation_date'] !== undefined) {
+                commentProps.created = app.moment(comment['creation_date']).unix();
+            }
+            await app.api.posts.create({
+                productId: '@SE/Comment',
+                typeId: 'comment',
+                parentId: post.postId,
+                body: comment.body,
+                objects: {
+                    legacy: {
+                        id: comment.id,
+                        params: comment.params
+                    }
+                },
+                ...commentProps
+            });
         }
-        await app.api.posts.create({
-            productId: '@SE/Comment',
-            typeId: 'comment',
-            parentId: post.postId,
-            body: comment.body,
-            objects: {
-                legacy: {
-                    id: comment.id,
-                    params: comment.params
-                }
-            },
-            ...commentProps
-        });
     }
 }
 
