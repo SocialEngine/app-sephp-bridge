@@ -51,6 +51,17 @@ const validMigrations = {
         name: 'Videos',
         dependency: ['users', 'connections', 'videos-categories'],
         requires: ['@SE/Video']
+    },
+    'forums-categories': {
+        id: 'forums-categories',
+        name: 'Forums',
+        requires: ['@SE/Discussion']
+    },
+    forums: {
+        id: 'forums',
+        name: 'Forum Topics/Posts',
+        dependency: ['users', 'connections', 'forums-categories'],
+        requires: ['@SE/Discussion']
     }
 };
 

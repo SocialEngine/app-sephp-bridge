@@ -30,12 +30,27 @@ async function apiRequest (endpoint, query = {}) {
 
 function handleCategory (type) {
     return async function (record) {
-        const channel = await app.api.users.create({
-            name: app.utility.str.random(6) + '-' + record.category_name,
-            type: type
-        });
-        await app.module.migration.set('categories', 'reverse:' + record.category_id, channel.id);
-        console.log('category', type, record.category_id, channel.id);
+        const addChannel = async function _add (record, parent = null) {
+            const props = {};
+            if (parent !== null) {
+                props.parentId = parent.id;
+            }
+            const channel = await app.api.users.create({
+                name: app.utility.str.random(6) + '-' + record.category_name,
+                type: type,
+                ...props
+            });
+            await app.module.migration.set('categories', 'reverse:' + record.category_id, channel.id);
+            console.log('Category:', type, channel.id);
+            if (record.children !== undefined) {
+                console.log('----');
+                for (const child of record.children) {
+                    await _add(child, channel);
+                }
+                console.log('----');
+            }
+        };
+        await addChannel(record);
     };
 }
 
@@ -76,6 +91,10 @@ async function handleItem (record) {
                 photo: record.photo
             };
             break;
+        case 'forum_topic':
+            productId = '@SE/Discussion';
+            typeId = 'discussion';
+            break;
     }
 
     if (record.category_id !== undefined && record.category_id) {
@@ -83,6 +102,10 @@ async function handleItem (record) {
         if (channel) {
             props.channel = [channel];
         }
+    }
+
+    if (record['creation_date'] !== undefined) {
+        props.created = app.moment(record['creation_date']).unix();
     }
 
     const createProps = {
@@ -115,6 +138,10 @@ async function handleItem (record) {
     for (const comment of record.comments) {
         user = await app.module.getUserFromLegacyId(comment.poster_id);
         await app.setViewer(user.id);
+        const commentProps = {};
+        if (comment['creation_date'] !== undefined) {
+            commentProps.created = app.moment(comment['creation_date']).unix();
+        }
         await app.api.posts.create({
             productId: '@SE/Comment',
             typeId: 'comment',
@@ -125,7 +152,8 @@ async function handleItem (record) {
                     id: comment.id,
                     params: comment.params
                 }
-            }
+            },
+            ...commentProps
         });
     }
 }
@@ -142,11 +170,13 @@ const handleMigration = {
     'blogs-categories': handleCategory('blogs'),
     'albums-categories': handleCategory('photos'),
     'videos-categories': handleCategory('videos'),
+    'forums-categories': handleCategory('discussion'),
 
     blogs: handleItem,
     albums: handleItem,
     status: handleItem,
     videos: handleItem,
+    forums: handleItem,
 
     users: async function (record) {
         let user = await app.api.users.findByEmail(record.email);
