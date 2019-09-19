@@ -2,3 +2,6 @@
 node_modules/
 .cache/
 !.cache/.gitkeep
+src/HelloWorld
+srv/HelloWorld
+.se/HelloWorld
