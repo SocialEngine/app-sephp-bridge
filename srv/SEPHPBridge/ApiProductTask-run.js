@@ -54,7 +54,7 @@ function handleCategory (type) {
     };
 }
 
-async function handleItem (record) {
+async function handleItem (record, response) {
     let user = await app.module.getUserFromLegacyId(record.user_id);
     await app.setViewer(user.id);
 
@@ -62,12 +62,12 @@ async function handleItem (record) {
     let typeId = 'status';
     const legacyProps = {};
     const props = {};
-    switch (record.type) {
-        case 'blog_new':
+    switch (response.table) {
+        case 'engine4_blog_blogs':
             productId = '@SE/Topic';
             typeId = 'topic';
             break;
-        case 'album_photo_new':
+        case 'engine4_album_albums':
             productId = '@SE/Media';
             typeId = 'image';
             const storageIds = [];
@@ -83,7 +83,7 @@ async function handleItem (record) {
             }
             props.storageId = storageIds;
             break;
-        case 'video_new':
+        case 'engine4_video_videos':
             productId = '@SE/Video';
             typeId = 'video';
             legacyProps.video = {
@@ -91,11 +91,11 @@ async function handleItem (record) {
                 photo: record.photo
             };
             break;
-        case 'forum_topic':
+        case 'engine4_forum_topics':
             productId = '@SE/Discussion';
             typeId = 'discussion';
             break;
-        case 'polls':
+        case 'engine4_poll_polls':
             productId = '@SE/User';
             typeId = 'status';
             props.pollQuestion = record.subject;
@@ -146,7 +146,7 @@ async function handleItem (record) {
     }
     await app.module.migration.set('posts', record.type + ':' + record.id, post.id);
 
-    console.log('Post:', post.id);
+    console.log('Post[' + response.table + ']:', post.id);
 
     if (record.type === 'polls') {
         for (const vote of record.votes) {
@@ -262,7 +262,7 @@ function startMigration (type, cb, limit = 2) {
                 migration: await app.module.migration.get(type)
             });
             for (const record of response.records) {
-                await cb(record)
+                await cb(record, response)
                     .catch(e => {
                         console.log('error:', e);
                     })
