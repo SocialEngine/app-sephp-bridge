@@ -265,7 +265,7 @@ function startMigration (type, cb, limit = 2) {
                 await cb(record, response)
                     .catch(e => {
                         console.log('error:', e);
-                    })
+                    });
             }
             if (response.records.length) {
                 return request((page + 1));
@@ -285,7 +285,7 @@ module.exports = async function ({task}) {
             return false;
         });
         if (response === false) {
-            await app.module.migration.set(type, 'failed', e.message);
+            await app.module.migration.set(type, 'failed', app.now());
         } else {
             await app.module.migration.set(type, 'completed', app.now());
         }

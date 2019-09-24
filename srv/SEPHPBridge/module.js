@@ -7,7 +7,7 @@ const app = require('app');
 const validMigrations = {
     users: {
         id: 'users',
-        name: 'Users',
+        name: 'Users'
     },
     connections: {
         id: 'connections',
@@ -89,7 +89,7 @@ module.exports = {
             await app.data.del('sephp:migration:' + type + ':' + key);
         },
 
-        get: async (type)  => {
+        get: async (type) => {
             const migration = validMigrations[type];
             const keys = [
                 'started',

@@ -12,7 +12,7 @@ module.exports = async function ({router}) {
                     return false;
                 }
                 return post.permalink;
-            }
+            };
         };
         const map = [
             {
@@ -99,18 +99,17 @@ module.exports = async function ({router}) {
             app.viewer.id
         );
         const request = await app.fetch(url + '/bridge/connect/auth', {
-                method: 'POST',
-                body: JSON.stringify({
-                    auth: req.get(':auth'),
-                    apiKey: apiKey.publicKey + ':' + apiKey.privateKey,
-                    viewerToken: viewerApiToken.token,
-                    siteId: app.site.id()
-                }),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+            method: 'POST',
+            body: JSON.stringify({
+                auth: req.get(':auth'),
+                apiKey: apiKey.publicKey + ':' + apiKey.privateKey,
+                viewerToken: viewerApiToken.token,
+                siteId: app.site.id()
+            }),
+            headers: {
+                'Content-Type': 'application/json'
             }
-        );
+        });
         const data = await request.json();
         if (data.error !== undefined) {
             res(data);

@@ -11,7 +11,7 @@ module.exports = async function (event) {
             if (cdnUrl) {
                 url = cdnUrl;
                 if (url.slice(-1) === '/') {
-                    url = url.substr(0, url.length -1);
+                    url = url.substr(0, url.length - 1);
                 }
             }
             let image = '';

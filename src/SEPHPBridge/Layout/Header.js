@@ -5,7 +5,6 @@ import Nav from '@SE/Core/Nav';
 import SearchFormNav from '@SE/Search/Form/Nav';
 
 export default class SEPHPBridgeLayoutHeader extends React.Component {
-
     componentDidCatch (error, info) {
         app.withException(error, info);
     }

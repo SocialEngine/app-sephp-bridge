@@ -1,4 +1,3 @@
-const app = require('app');
 
 module.exports = async function (event) {
     let body = event.payload.body;
@@ -9,6 +8,6 @@ module.exports = async function (event) {
     body = body.replace(/&gt;/g, '>');
     body = body.replace(/&amp;nbsp;/g, ' ');
     body = body.replace(/&quot;/g, '"');
-    body = body.replace(/&#x2F;/g, '/')
+    body = body.replace(/&#x2F;/g, '/');
     event.payload.body = body;
 };

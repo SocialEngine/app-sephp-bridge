@@ -5,7 +5,7 @@
   "description": "",
   "main": "socialengine",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "bash test/eslint.sh"
   },
   "repository": {
     "type": "git",
@@ -22,5 +22,8 @@
     "@socialengine/unite-ide-helper": "git://github.com/SocialEngine/unite-ide-helper.git",
     "prop-types": "^15.6.1",
     "react": "^16.7.0"
+  },
+  "devDependencies": {
+    "@socialengine/lint": "^1.0.1"
   }
 }
