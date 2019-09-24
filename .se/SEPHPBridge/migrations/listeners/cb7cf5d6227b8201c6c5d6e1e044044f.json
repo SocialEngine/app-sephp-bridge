@@ -1,5 +1,5 @@
 {
-    "code": "const app = require('app');\n\nmodule.exports = async function (event) {\n    event.config.sephp = {\n        url: await app.data.get('sephp:url'),\n        cdn: await app.setting('sephp:cdnUrl')\n    }\n};\n",
+    "code": "const app = require('app');\n\nmodule.exports = async function (event) {\n    event.config.sephp = {\n        url: await app.data.get('sephp:url'),\n        cdn: await app.setting('sephp:cdnUrl')\n    };\n};\n",
     "events": [
         "ApiSiteBuild.js.config"
     ],
