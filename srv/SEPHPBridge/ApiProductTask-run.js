@@ -1,6 +1,6 @@
 const app = require('app');
 
-// EDIT[123]
+// EDIT[1234]
 
 async function apiRequest (endpoint, query = {}) {
     const url = await app.data.get('sephp:url');
@@ -21,8 +21,14 @@ async function apiRequest (endpoint, query = {}) {
         headers: {
             'SE-Unite-Token': token
         }
+    }).catch(e => {
+        console.log(e);
+        return false;
     });
-    const response = await request.json();
+    const response = await request.json().catch(e => {
+        console.log(e);
+        return false;
+    });
     // console.log('response', response);
 
     return response;

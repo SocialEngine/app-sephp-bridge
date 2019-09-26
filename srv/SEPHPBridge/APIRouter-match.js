@@ -154,10 +154,12 @@ module.exports = async function ({router}) {
         await app.module.migration.del(type, 'total');
 
         const migration = await app.module.migration.get(type);
-        app.task('migration', {
+        const id = app.task('migration', {
             type: type,
-            limit: req.get('limit', 100)
+            limit: req.get('limit', 100),
+            returnId: req.get('returnId', false)
         });
+        await app.module.migration.set(type, 'taskId', id);
         res(migration);
     });
 

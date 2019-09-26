@@ -97,7 +97,8 @@ module.exports = {
                 'completed',
                 'failed',
                 'total',
-                'page'
+                'page',
+                'taskId'
             ];
             for (const key of keys) {
                 migration[key] = await app.data.get('sephp:migration:' + type + ':' + key);
