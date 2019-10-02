@@ -248,6 +248,44 @@ const handleMigration = {
                 user_id: record.id
             }));
         }
+    },
+
+    messages: async record => {
+        const viewer = await app.module.getUserFromLegacyId(record.user_id);
+        await app.setViewer(viewer.id);
+        const firstMessage = record.messages[0] || null;
+        if (!firstMessage) {
+            await app.module.migration.set('messages', record.id, {
+                error: 'Missing first message'
+            });
+            return null;
+        }
+        const data = {
+            body: firstMessage.body,
+            toUser: [],
+            created: app.moment(firstMessage.date).unix()
+        };
+        for (const user of record.users) {
+            const activeUser = await app.module.getUserFromLegacyId(user.user_id);
+            data.toUser.push(activeUser.id);
+        }
+        const message = await app.api.messages.create(data);
+        if (record.messages.length > 1) {
+            let iteration = 0;
+            for (const m of record.messages) {
+                iteration++;
+                if (iteration === 1) {
+                    continue;
+                }
+                const activeUser = await app.module.getUserFromLegacyId(m.user_id);
+                await app.api.messages.create({
+                    roomId: message.roomId,
+                    body: m.body,
+                    created: app.moment(m['date']).unix()
+                }, activeUser.id);
+            }
+        }
+        await app.module.migration.set('messages', record.id, message.roomId);
     }
 };
 

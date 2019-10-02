@@ -33,6 +33,17 @@ module.exports = async function ({router}) {
                     '/videos/:section/:id/:title'
                 ],
                 action: handleRedirection('video_new')
+            },
+            {
+                match: [
+                    '/messages/view/id/:id'
+                ],
+                action: async (segmentKeys) => {
+                    const messageId = await app.module.migration.getKey('messages', segmentKeys[':id']);
+                    if (messageId) {
+                        return '/messages/' + messageId;
+                    }
+                }
             }
         ];
         let callMatch = null;
@@ -63,9 +74,11 @@ module.exports = async function ({router}) {
         }
         if (callMatch) {
             const r = await callMatch(segments);
-            return res({
-                to: r
-            });
+            if (r) {
+                return res({
+                    to: r
+                });
+            }
         }
         res({
             error: 'No redirect found.'

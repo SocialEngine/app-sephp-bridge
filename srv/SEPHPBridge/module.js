@@ -1,7 +1,7 @@
 const app = require('app');
 
 /*
- * EDIT[12]
+ * EDIT[123]
  */
 
 const validMigrations = {
@@ -68,6 +68,12 @@ const validMigrations = {
         name: 'Polls',
         dependency: ['users', 'connections'],
         requires: ['@SE/Poll']
+    },
+    messages: {
+        id: 'messages',
+        name: 'Private Messages',
+        dependency: ['users'],
+        requires: ['@SE/Message']
     }
 };
 
@@ -82,6 +88,7 @@ module.exports = {
         },
 
         set: async (type, key, value) => {
+            console.log('SET:', type + ':' + key, value);
             await app.data.set('sephp:migration:' + type + ':' + key, value);
         },
 
