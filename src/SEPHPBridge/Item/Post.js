@@ -9,26 +9,27 @@ import Time from '@SE/Core/Time';
 app.css(`
 <style>
 .post-activity {
-    border-left: 4px ${app.style.cardBg} solid;
     margin-bottom: 30px;
+    background: ${app.style.cardBg};
+    border-radius: ${app.style.cardBorderRadius};
+}
+
+.post-activity-parent {
+    border-left: 4px ${app.style.gray200} solid;
+    margin-top: 10px;
+    padding: 10px;
 }
 
 .post-activity-body {
     padding: ${app.style.cardBodyPadding};
 }
 
+.post-activity-parent a {
+    color: ${app.style.textFocus};
+}
+
 .post-activity-placeholder {
     margin-bottom: 30px;
-}
-
-.post-activity-placeholder .timeline-item {
-    max-height: 50px;
-    min-height: 50px;
-    background: ${app.style.bodyBg};
-}
-
-.post-activity-placeholder .background-masker {
-    background: ${app.style.bodyBg};
 }
 </style>
 `);
@@ -117,11 +118,13 @@ export default class ItemPost extends React.Component {
         }
 
         return (
-            <div>
+            <div className="post-activity-parent">
                 <a href={legacyUrl + post.parent.href}>
                     {post.parent.title}
                 </a>
-                <div dangerouslySetInnerHTML={{__html: this.parseHtml(post.parent.body)}} />
+                <div
+                    className="text-muted small"
+                    dangerouslySetInnerHTML={{__html: this.parseHtml(post.parent.body)}} />
             </div>
         );
     }
@@ -134,10 +137,12 @@ export default class ItemPost extends React.Component {
         return (
             <article
                 className="post-activity"
+                data-legacy-id={this.state.legacyId}
+                data-legacy-type={this.state.legacyType}
                 data-post-id={post.id}
                 data-post-type={post.typeId}>
                 <div className="post-activity-body">
-                    <div className="d-flex align-items-center">
+                    <div className="d-flex align-items-start">
                         <div className="mr-2">
                             <UserImage user={post.user} size="xs" />
                         </div>
@@ -146,8 +151,6 @@ export default class ItemPost extends React.Component {
                                 fontSize: app.style.fontSizeXs
                             }}>
                                 <Time timestamp={post.created} />
-                                [{this.state.legacyId}]
-                                [{this.state.legacyType}]
                             </small>
                             <div>
                                 {this.renderBody()}
