@@ -1,7 +1,7 @@
 const app = require('app');
 
 /*
- * EDIT[123]
+ * EDIT[1234]
  */
 
 const validMigrations = {
@@ -74,6 +74,11 @@ const validMigrations = {
         name: 'Private Messages',
         dependency: ['users'],
         requires: ['@SE/Message']
+    },
+    feed: {
+        id: 'feed',
+        name: 'Activity Feed',
+        dependency: ['users', 'connections']
     }
 };
 
@@ -105,7 +110,8 @@ module.exports = {
                 'failed',
                 'total',
                 'page',
-                'taskId'
+                'taskId',
+                'limit'
             ];
             for (const key of keys) {
                 migration[key] = await app.data.get('sephp:migration:' + type + ':' + key);

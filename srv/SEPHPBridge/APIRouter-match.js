@@ -1,5 +1,7 @@
 const app = require('app');
 
+// EDIT[123]
+
 module.exports = async function ({router}) {
     router.get('/redirect', async function (req, res) {
         const uri = req.get('uri');
@@ -20,19 +22,25 @@ module.exports = async function ({router}) {
                     '/forums/topic/:id/:title/view/post_id/:post',
                     '/forums/topic/:id/:title'
                 ],
-                action: handleRedirection('forum_topic')
+                action: handleRedirection('engine4_forum_topics')
+            },
+            {
+                match: [
+                    '/blogs/:category/:id/:title'
+                ],
+                action: handleRedirection('engine4_blog_blogs')
             },
             {
                 match: [
                     '/polls/view/:id/:title'
                 ],
-                action: handleRedirection('polls')
+                action: handleRedirection('engine4_poll_polls')
             },
             {
                 match: [
                     '/videos/:section/:id/:title'
                 ],
-                action: handleRedirection('video_new')
+                action: handleRedirection('engine4_video_videos')
             },
             {
                 match: [
@@ -152,6 +160,7 @@ module.exports = async function ({router}) {
     router.post('/migrations/:type', async function (req, res) {
         await app.api.adminsOnly();
         const type = req.get(':type');
+        const page = req.get('page', 1);
         const migrations = app.module.migration.all();
 
         if (migrations[type] === undefined) {
@@ -162,8 +171,9 @@ module.exports = async function ({router}) {
 
         await app.module.migration.set(type, 'started', app.now());
         await app.module.migration.set(type, 'socketId', socketId);
+        await app.module.migration.set(type, 'page', page);
+        await app.module.migration.set(type, 'limit', req.get('limit', 100));
         await app.module.migration.del(type, 'completed');
-        await app.module.migration.del(type, 'page');
         await app.module.migration.del(type, 'total');
 
         const migration = await app.module.migration.get(type);

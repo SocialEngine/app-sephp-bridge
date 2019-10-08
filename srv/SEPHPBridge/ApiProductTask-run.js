@@ -114,6 +114,28 @@ async function handleItem (record, response) {
                 props.pollAnswer.push(answer['poll_option']);
             }
             break;
+        case 'engine4_activity_actions':
+            const toIgnore = [
+                'album_photo_new',
+                'blog_new',
+                'poll_new',
+                'music_playlist_new',
+                'post_self_multi_photo',
+                'post_self',
+                'video_new',
+                'post_event',
+                'like_activity_action',
+                'comment_activity_action'
+            ];
+            if (toIgnore.includes(record['type'])) {
+                return null;
+            }
+            productId = '@SE/SEPHPBridge';
+            typeId = 'post';
+            legacyProps.obj = {
+                type: record.object_type
+            };
+            break;
     }
 
     if (record.category_id !== undefined && record.category_id) {
@@ -125,6 +147,8 @@ async function handleItem (record, response) {
 
     if (record['creation_date'] !== undefined) {
         props.created = app.moment(record['creation_date']).unix();
+    } else if (record['date'] !== undefined) {
+        props.created = app.moment(record['date']).unix();
     }
 
     const createProps = {
@@ -135,7 +159,7 @@ async function handleItem (record, response) {
         objects: {
             legacy: {
                 id: record.id,
-                type: record.type,
+                table: response.table,
                 params: record.params,
                 ...legacyProps
             }
@@ -143,18 +167,19 @@ async function handleItem (record, response) {
         ...props
     };
     const post = await app.api.posts.create(createProps).catch(e => {
-        console.error(e);
+        console.log(e);
         return false;
     });
 
     if (!post) {
+        console.log('Failed to created:', post);
         return null;
     }
-    await app.module.migration.set('posts', record.type + ':' + record.id, post.id);
+    await app.module.migration.set('posts', response.table + ':' + record.id, post.id);
 
     console.log('Post[' + response.table + ']:', post.id);
 
-    if (record.type === 'polls') {
+    if (response.table === 'engine4_poll_polls') {
         for (const vote of record.votes) {
             user = await app.module.getUserFromLegacyId(vote.user_id);
             const answerId = await app.module.migration.getKey('pollAnswer', vote['poll_option_id']);
@@ -189,6 +214,22 @@ async function handleItem (record, response) {
             });
         }
     }
+
+    if (record.reactions !== undefined) {
+        for (const reaction of record.reactions) {
+            user = await app.module.getUserFromLegacyId(reaction.poster_id);
+            await app.setViewer(user.id);
+            const reactionProps = {};
+            if (reaction['creation_date'] !== undefined) {
+                reactionProps.created = app.moment(reaction['creation_date']).unix();
+            }
+            await app.api.reactions.create({
+                postId: post.postId,
+                reaction: 'heart',
+                ...reactionProps
+            });
+        }
+    }
 }
 
 const handleMigration = {
@@ -196,8 +237,15 @@ const handleMigration = {
         let user = await app.module.getUserFromLegacyId(record.object_id);
         let connection = await app.module.getUserFromLegacyId(record.subject_id);
         await app.setViewer(user.id);
-        const response = await app.api.connections.create(connection.id).catch(() => false);
-        console.log('connection:', user.id, '->', connection.id, '->', response);
+        const response = await app.api.connections
+            .create(connection.id)
+            .catch(e => {
+                console.log(e);
+                return false;
+            });
+        if (response) {
+            console.log('connection:', user.id, '->', connection.id, '->', response);
+        }
     },
 
     'blogs-categories': handleCategory('blogs'),
@@ -211,6 +259,7 @@ const handleMigration = {
     videos: handleItem,
     forums: handleItem,
     polls: handleItem,
+    feed: handleItem,
 
     users: async function (record) {
         let user = await app.api.users.findByEmail(record.email);
@@ -317,7 +366,11 @@ function startMigration (type, cb, limit = 2) {
                 resolve();
             }
         };
-        return start(1);
+        let page = 1;
+        if (migration.page) {
+            page = migration.page;
+        }
+        return start(page);
     });
 }
 

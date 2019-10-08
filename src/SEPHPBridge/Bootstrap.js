@@ -1,5 +1,6 @@
 import app from '@SE/Core/App';
 import '@SE/SEPHPBridge/Style/Common';
+import ItemPost from '@SE/SEPHPBridge/Item/Post';
 
 console.log('Bridge Bootstrap [1]');
 
@@ -31,5 +32,13 @@ app.subscribe('UserImage.buildImage.picture', function (event) {
                 event.payload.picture = url + '/' + find.path;
             }
         } catch (e) {}
+    }
+});
+
+app.subscribe('Post.render', function (event) {
+    if (event.payload.post.typeId === 'post') {
+        event.payload.Component = (
+            <ItemPost post={event.payload.post} />
+        );
     }
 });

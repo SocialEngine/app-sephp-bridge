@@ -78,14 +78,15 @@ export default class SEPHPBridgeControllerACPMigrations extends React.Component 
         }));
     }
 
-    startMigration (type, limit, cb) {
+    startMigration (type, limit, page, cb) {
         this.setState({
             hasStarted: this.state.hasStarted.concat(type),
             limit: limit
         }, () => {
             app.api('/@SE/SEPHPBridge/migrations/' + type)
                 .create({
-                    limit: this.state.limit
+                    limit: this.state.limit,
+                    page: page
                 })
                 .then(response => {
                     this.subscribeToSocket(response);
@@ -107,6 +108,8 @@ export default class SEPHPBridgeControllerACPMigrations extends React.Component 
 
     handleMigration (record) {
         return () => {
+            const page = record.page || 1;
+            const total = record.limit || 1000;
             render(
                 <Modal
                     title={'Migrate: ' + record.name}
@@ -114,21 +117,29 @@ export default class SEPHPBridgeControllerACPMigrations extends React.Component 
                         <Form
                             coverOnSubmit={true}
                             onSubmit={({values}) => {
-                                this.startMigration(record.id, values.total || 1000, () => {
+                                this.startMigration(record.id, values.total || 1000, values.page || 1, () => {
                                     modal.close();
                                 });
                             }}
                             values={{
-                                total: 1000
+                                total: total,
+                                page: page
                             }}
                             render={({as}) => (
                                 <React.Fragment>
                                     <Number
                                         {...as('total')}
                                         label="How many records per request should we import?"
-                                        value={1000}
+                                        value={total}
                                     />
-                                    <Submit value="Start" />
+                                    {!record.page || (
+                                        <Number
+                                            {...as('page')}
+                                            label="Start from page"
+                                            value={page}
+                                        />
+                                    )}
+                                    <Submit value={record.started ? 'Continue' : 'Start'} />
                                 </React.Fragment>
                             )} />
                     )}
