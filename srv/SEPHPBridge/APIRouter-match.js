@@ -225,4 +225,15 @@ module.exports = async function ({router}) {
             url: url + '/bridge/connect/sso?token=' + token
         });
     });
+
+    router.post('/activity', async function (req, res) {
+        await app.api.adminsOnly();
+        await app.module.handleItem(req.get('action'), {
+            table: 'engine4_activity_actions'
+        });
+        res({
+            foo: 'bar',
+            req: req.all()
+        });
+    });
 };

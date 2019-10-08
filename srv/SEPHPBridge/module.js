@@ -184,5 +184,177 @@ module.exports = {
             }));
 
         return this.getUser(id);
+    },
+
+    async handleItem (record, response) {
+        let user = await app.module.getUserFromLegacyId(record.user_id);
+        await app.setViewer(user.id);
+
+        let productId = '@SE/User';
+        let typeId = 'status';
+        const legacyProps = {};
+        const props = {};
+        switch (response.table) {
+            case 'engine4_blog_blogs':
+                productId = '@SE/Topic';
+                typeId = 'topic';
+                break;
+            case 'engine4_album_albums':
+                productId = '@SE/Media';
+                typeId = 'image';
+                const storageIds = [];
+                for (const photoUrl of record.photos) {
+                    const storage = await app.api.storage.create({
+                        productId: '@SE/Media',
+                        typeId: 'image',
+                        externalFile: photoUrl
+                    });
+                    if (storage) {
+                        storageIds.push(storage.id);
+                    }
+                }
+                props.storageId = storageIds;
+                break;
+            case 'engine4_video_videos':
+                productId = '@SE/Video';
+                typeId = 'video';
+                legacyProps.video = {
+                    code: record.code,
+                    photo: record.photo
+                };
+                break;
+            case 'engine4_forum_topics':
+                productId = '@SE/Discussion';
+                typeId = 'discussion';
+                break;
+            case 'engine4_poll_polls':
+                productId = '@SE/User';
+                typeId = 'status';
+                props.pollQuestion = record.subject;
+                props.pollAnswer = [];
+                record.subject = '';
+                let answerIteration = 0;
+                for (const answer of record.answers) {
+                    answerIteration++;
+                    await app.module.migration.set('pollAnswer', answer['poll_option_id'], answerIteration);
+                    props.pollAnswer.push(answer['poll_option']);
+                }
+                break;
+            case 'engine4_activity_actions':
+                const toIgnore = [
+                    'album_photo_new',
+                    'blog_new',
+                    'poll_new',
+                    'music_playlist_new',
+                    'post_self_multi_photo',
+                    'post_self',
+                    'video_new',
+                    'post_event',
+                    'like_activity_action',
+                    'comment_activity_action'
+                ];
+                if (toIgnore.includes(record['type'])) {
+                    return null;
+                }
+                productId = '@SE/SEPHPBridge';
+                typeId = 'post';
+                legacyProps.obj = {
+                    type: record.object_type
+                };
+                break;
+        }
+
+        if (record.category_id !== undefined && record.category_id) {
+            const channel = await app.module.migration.getKey('categories', 'reverse:' + record.category_id);
+            if (channel) {
+                props.channel = [channel];
+            }
+        }
+
+        if (record['creation_date'] !== undefined) {
+            props.created = app.moment(record['creation_date']).unix();
+        } else if (record['date'] !== undefined) {
+            props.created = app.moment(record['date']).unix();
+        }
+
+        const createProps = {
+            productId: productId,
+            typeId: typeId,
+            body: record.body,
+            subject: record.subject || '',
+            objects: {
+                legacy: {
+                    id: record.id,
+                    table: response.table,
+                    params: record.params,
+                    ...legacyProps
+                }
+            },
+            ...props
+        };
+        const post = await app.api.posts.create(createProps).catch(e => {
+            console.log(e);
+            return false;
+        });
+
+        if (!post) {
+            console.log('Failed to created:', post);
+            return null;
+        }
+        await app.module.migration.set('posts', response.table + ':' + record.id, post.id);
+
+        console.log('Post[' + response.table + ']:', post.id);
+
+        if (response.table === 'engine4_poll_polls') {
+            for (const vote of record.votes) {
+                user = await app.module.getUserFromLegacyId(vote.user_id);
+                const answerId = await app.module.migration.getKey('pollAnswer', vote['poll_option_id']);
+                await app.setViewer(user.id);
+                await app.api.posts.update(post.id, {
+                    pollVote: answerId
+                });
+                console.log('Poll Vote:', vote.user_id, vote['poll_option_id'], answerId);
+            }
+        }
+
+        if (record.comments !== undefined) {
+            for (const comment of record.comments) {
+                user = await app.module.getUserFromLegacyId(comment.poster_id);
+                await app.setViewer(user.id);
+                const commentProps = {};
+                if (comment['creation_date'] !== undefined) {
+                    commentProps.created = app.moment(comment['creation_date']).unix();
+                }
+                await app.api.posts.create({
+                    productId: '@SE/Comment',
+                    typeId: 'comment',
+                    parentId: post.postId,
+                    body: comment.body,
+                    objects: {
+                        legacy: {
+                            id: comment.id,
+                            params: comment.params
+                        }
+                    },
+                    ...commentProps
+                });
+            }
+        }
+
+        if (record.reactions !== undefined) {
+            for (const reaction of record.reactions) {
+                user = await app.module.getUserFromLegacyId(reaction.poster_id);
+                await app.setViewer(user.id);
+                const reactionProps = {};
+                if (reaction['creation_date'] !== undefined) {
+                    reactionProps.created = app.moment(reaction['creation_date']).unix();
+                }
+                await app.api.reactions.create({
+                    postId: post.postId,
+                    reaction: 'heart',
+                    ...reactionProps
+                });
+            }
+        }
     }
 };
